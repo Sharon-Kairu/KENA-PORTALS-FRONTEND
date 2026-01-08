@@ -6,9 +6,9 @@ import ScheduleClass from '@/app/components/modals/ScheduleClass'
 import StudentComment from '@/app/components/modals/StudentComment'
 
 const data = [
-  { id: 1, date: '2025-12-12', practical: 'Practical One', status: 'pass' },
-  { id: 2, date: '2025-12-17', practical: 'Practical Two', status: 'pass' },
-  { id: 3, date: 'N/A', practical: 'Reverse', status: 'pending' },
+  { id: 1, date: '2025-12-12', practical: 'Practical One', status: 'pass',comment:'Needs Practice' },
+  { id: 2, date: '2025-12-17', practical: 'Practical Two', status: 'pass',comment:'Very Good' },
+  { id: 3, date: 'N/A', practical: 'Reverse', status: 'pending' ,comment:'N/A' },
 ]
 
 const Page = () => {
@@ -114,6 +114,7 @@ const Page = () => {
                 <th className="px-4 py-2 text-gray-600">Date</th>
                 <th className="px-4 py-2 text-gray-600">Practical</th>
                 <th className="px-4 py-2 text-gray-600">Status</th>
+                <th className="px-4 py-2 text-gray-600">Comment</th>
               </tr>
             </thead>
             <tbody>
@@ -132,6 +133,7 @@ const Page = () => {
                       {item.status.toUpperCase()}
                     </span>
                   </td>
+                  <td className="px-4 py-3">{item.comment}</td>
                 </tr>
               ))}
             </tbody>
