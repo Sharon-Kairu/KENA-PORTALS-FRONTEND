@@ -6,70 +6,118 @@ import { students } from '../../data/students'
 
 const Page = () => {
   return (
-    <div className="ml-5 lg:ml-64">
-      {/* Header – fixed on top */}
+    <div className="ml-0 lg:ml-64">
+      {/* Header */}
       <div
         className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-40
-                   h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6
-                   border-b border-gray-200 shadow-sm"
+                h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6
+                border-b border-gray-200 shadow-sm"
       >
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-          Instructor Dashboard
+        <h1 className="text-xl md:text-3xl font-bold text-gray-800">
+          Gradebook
         </h1>
-        <p className="text-gray-600 text-md md:text-lg mt-1">
+        <p className="text-green-600 text-sm md:text-lg mt-1">
           Welcome, Instructor One
         </p>
       </div>
 
-      {/* Gradebook content */}
-      <div className="p-4 md:p-6 mt-24 md:mt-28 space-y-6">
-        {/* Search bar */}
-        <div className="mb-4">
-          <input
-            className="w-full p-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            type="text"
-            placeholder="Enter student name..."
-          />
+      {/* Content */}
+      <div className="p-4 md:p-10 mt-24 space-y-6">
+        {/* Search */}
+        <input
+          className="w-full p-3 bg-white border border-gray-300 rounded-lg shadow-sm
+                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+          type="text"
+          placeholder="Search student..."
+        />
+
+        {/* ===== MOBILE VIEW (Cards) ===== */}
+        <div className="space-y-4 md:hidden">
+          {students.map((student) => {
+            const completedFeatures = student.pracs
+              .flatMap(prac => prac.features)
+              .filter(f => f.status === 'Completed')
+
+            let lastCompletedDate = 'N/A'
+            if (completedFeatures.length > 0) {
+              lastCompletedDate = completedFeatures.reduce((prev, current) =>
+                new Date(current.date) > new Date(prev.date) ? current : prev
+              ).date
+            }
+
+            return (
+              <div
+                key={student.id}
+                className="bg-white border border-blue-500 rounded-xl p-4 shadow-sm space-y-2"
+              >
+                <div>
+                  <p className="text-sm text-gray-500">Student</p>
+                  <p className="font-semibold text-blue-500">{student.name}</p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="text-gray-700 text-sm">{student.email}</p>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-500">Last Practical</p>
+                    <p className="text-gray-700 text-sm">{lastCompletedDate}</p>
+                  </div>
+
+                  <Link
+                    href={`/instructor/gradebook/${student.slug}`}
+                    className="px-3 py-2 bg-blue-600 text-white text-sm
+                               rounded-lg font-medium hover:bg-green-700"
+                  >
+                    Grade Next Practical
+                  </Link>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
-        {/* Students Table */}
-        <div className="overflow-x-auto bg-white shadow rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        {/* ===== DESKTOP VIEW (Table) ===== */}
+        <div className="hidden md:block bg-white shadow rounded-lg p-4 overflow-x-auto">
+          <table className="min-w-full text-lg">
+            <thead className="border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Practical Date</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-4 text-left font-semibold text-gray-700">ID</th>
+                <th className="px-6 py-4 text-left font-semibold text-gray-700">Name</th>
+                <th className="px-6 py-4 text-left font-semibold text-gray-700">Email</th>
+                <th className="px-6 py-4 text-left font-semibold text-gray-700">Last Practical</th>
+                <th className="px-6 py-4 text-right font-semibold text-gray-700">Action</th>
               </tr>
             </thead>
 
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {students.map((student) => {
                 const completedFeatures = student.pracs
-                    .flatMap(prac => prac.features)
-                    .filter(f => f.status === 'Completed')
+                  .flatMap(prac => prac.features)
+                  .filter(f => f.status === 'Completed')
 
-                // Find the latest date among completed features
-                let lastCompletedDate: string = 'N/A'
+                let lastCompletedDate = 'N/A'
                 if (completedFeatures.length > 0) {
-                    const latestFeature = completedFeatures.reduce((prev, current) =>
+                  lastCompletedDate = completedFeatures.reduce((prev, current) =>
                     new Date(current.date) > new Date(prev.date) ? current : prev
-                    )
-                    lastCompletedDate = latestFeature.date
+                  ).date
                 }
 
                 return (
-                  <tr key={student.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{student.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{student.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{student.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{lastCompletedDate}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <tr
+                    key={student.id}
+                    className="transition rounded-lg hover:bg-green-100 hover:shadow-md"
+                  >
+                    <td className="px-6 py-4 text-gray-700">{student.id}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">{student.name}</td>
+                    <td className="px-6 py-4 text-gray-700">{student.email}</td>
+                    <td className="px-6 py-4 text-gray-700">{lastCompletedDate}</td>
+                    <td className="px-6 py-4 text-right">
                       <Link
-                        href={`/student/${student.slug}`}
-                        className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+                        href={`/instructor/gradebook/${student.slug}`}
+                        className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg font-medium hover:bg-green-700 transition"
                       >
                         Grade Next Practical
                       </Link>
@@ -80,6 +128,7 @@ const Page = () => {
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
   )
