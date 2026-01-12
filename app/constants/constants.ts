@@ -4,8 +4,10 @@ import {
   FiBookOpen,
   FiCreditCard,
   FiUser,
-  FiSettings,
+  FiPenTool
+  
 } from 'react-icons/fi'
+import { FaUsers, FaSquareCheck} from 'react-icons/fa6'
 
 export const studentPages = [
   {
@@ -19,23 +21,45 @@ export const studentPages = [
     icon: FiBookOpen,
   },
   {
+    name: 'Content',
+    href: '/student/content',
+    icon: FiPenTool,
+  },
+  {
     name: 'Payments',
     href: '/student/payments',
     icon: FiCreditCard,
   },
-  {
-    name: 'Content',
-    href: '/student/content',
-    icon: FiCreditCard,
-  },
+  
   {
     name: 'Profile',
     href: '/student/profile',
     icon: FiUser,
   },
+ 
+]
+
+export const instructorPages = [
   {
-    name: 'Settings',
-    href: '/student/settings',
-    icon: FiSettings,
+    name: 'Dashboard',
+    href: '/instructor/dashboard',
+    icon: FiHome,
+  },
+  
+  {
+    name: 'All Students',
+    href: '/instructor/students',
+    icon: FaUsers,
+  },
+  {
+    name: 'Gradebook',
+    href: '/instructor/gradebook',
+    icon: FaSquareCheck,
+  },
+
+  {
+    name: 'Profile',
+    href: '/instructor/profile',
+    icon: FiUser,
   },
 ]

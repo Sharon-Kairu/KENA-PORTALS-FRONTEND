@@ -36,9 +36,11 @@ const getBadgeColor = (slug: string) => {
 // Main Page Component
 const page = () => {
   return (
-    <div className="ml-25 md:ml-64">
+    <div className="ml-5 md:ml-64">
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 left-20 md:left-64 bg-white z-50 p-4 md:p-6 border-b border-gray-200 shadow-sm">
+      <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-40
+                h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6
+                border-b border-gray-200 shadow-sm">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">My Courses</h1>
         <p className="text-green-600 text-md md:text-lg mt-1">Welcome, Sharon Kairu</p>
       </div>

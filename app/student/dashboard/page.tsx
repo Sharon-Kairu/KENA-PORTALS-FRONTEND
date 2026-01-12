@@ -16,12 +16,19 @@ const Page = () => {
   const [showCommentModal, setShowCommentModal] = useState(false)
 
   return (
-    <div className="ml-25 md:ml-64">
+    <div className="ml-5 lg:ml-64">
       {/* Header – fixed on top */}
-      <div className="fixed top-0 left-0 right-0 left-20 md:left-64 bg-white z-50 p-4 md:p-6 border-b border-gray-200 shadow-sm">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Student Dashboard</h1>
-        <p className="text-green-600 text-md md:text-lg mt-1">Welcome, Sharon Kairu</p>
+      <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-40
+                h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6
+                border-b border-gray-200 shadow-sm">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          Student Dashboard
+        </h1>
+        <p className="text-green-600 text-md md:text-lg mt-1">
+          Welcome, Sharon Kairu
+        </p>
       </div>
+
 
       {/* Content */}
       <div className="p-4 md:p-6 mt-24 md:mt-28 space-y-6">
@@ -51,17 +58,7 @@ const Page = () => {
             <p className="text-sm text-green-600 mt-1">Keep practicing, you’re almost there 🚗</p>
           </div>
 
-          {/* Instructor Change */}
-          <div className="bg-orange-50 p-6 rounded-xl shadow-sm border border-orange-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-orange-700 font-semibold text-lg">Instructor Change</h2>
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-orange-100 text-orange-700">
-                <FiUserCheck size={22} />
-              </div>
-            </div>
-            <p className="mt-4 text-3xl font-bold text-orange-800">5 Days</p>
-            <p className="text-sm text-orange-600 mt-1">You can request a new instructor after this</p>
-          </div>
+          
         </div>
 
         {/* Schedule & Comment */}

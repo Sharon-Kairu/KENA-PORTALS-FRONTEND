@@ -1,15 +1,14 @@
 'use client'
-
 import { useState } from 'react'
-import StudentNav from '../components/navigation/StudentNav'
+import InstructorNav from '../components/navigation/InstructorNav'
 
-export default function StudentLayout({ children }: { children: React.ReactNode }) {
+export default function InstructorLayout({ children }: { children: React.ReactNode }) {
   const [mobileCollapsed, setMobileCollapsed] = useState(true)
 
   return (
     <div className="flex min-h-screen bg-gray-100 relative">
       {/* Sidebar */}
-      <StudentNav mobileCollapsed={mobileCollapsed} setMobileCollapsed={setMobileCollapsed} />
+      <InstructorNav mobileCollapsed={mobileCollapsed} setMobileCollapsed={setMobileCollapsed} />
 
       {/* Page Content */}
       <div
