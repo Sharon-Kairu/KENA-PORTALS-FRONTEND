@@ -4,10 +4,10 @@ import {
   FiBookOpen,
   FiCreditCard,
   FiUser,
-  FiPenTool
-  
+  FiPenTool,
+  FiBarChart
 } from 'react-icons/fi'
-import { FaUsers, FaSquareCheck} from 'react-icons/fa6'
+import { FaUsers,FaBook, FaSquareCheck,FaUserCheck,FaUserGraduate} from 'react-icons/fa6'
 
 export const studentPages = [
   {
@@ -62,4 +62,43 @@ export const instructorPages = [
     href: '/instructor/profile',
     icon: FiUser,
   },
+]
+
+export const adminPages=[
+  {
+    name: 'Dashboard',
+    href: '/admin/dashboard',
+    icon: FiHome,
+  },
+  {
+    name: 'Add Student',
+    href: '/admin/addstudent',
+    icon: FaUserGraduate,
+  },
+  {
+    name: 'Add Instructor',
+    href: '/admin/addinstructor',
+    icon: FaUserCheck,
+  },
+  {
+    name: 'All Students',
+    href: '/admin/allstudents',
+    icon: FaUsers,
+  },
+  {
+    name: 'Add Content',
+    href: '/admin/addcontent',
+    icon: FaBook,
+  },
+  {
+    name: 'Register Payment',
+    href: '/admin/registerpayment',
+    icon: FiCreditCard,
+  },
+  {
+    name: 'Reports',
+    href: '/admin/reports',
+    icon: FiBarChart,
+  },
+  
 ]
