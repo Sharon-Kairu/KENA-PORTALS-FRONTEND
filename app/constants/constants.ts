@@ -86,13 +86,13 @@ export const adminPages=[
     icon: FaUsers,
   },
   {
-    name: 'Add Content',
-    href: '/admin/addcontent',
+    name: 'Content',
+    href: '/admin/content',
     icon: FaBook,
   },
   {
-    name: 'Register Payment',
-    href: '/admin/registerpayment',
+    name: 'Payments',
+    href: '/admin/payments',
     icon: FiCreditCard,
   },
   {

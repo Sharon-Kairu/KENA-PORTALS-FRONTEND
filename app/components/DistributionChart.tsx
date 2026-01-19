@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { studentDistribution } from '@/app/data/distribution'
 import { FiCalendar } from 'react-icons/fi'
-
 import {
   LineChart,
   Line,
@@ -11,15 +10,27 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts'
 
 const DistributionChart = () => {
-  const [year, setYear] = useState<'2025' | '2026'>('2026')
+  const [year, setYear] = useState<number>(2026)
+
+  // Available years for the dropdown
+  const years = useMemo(
+    () => studentDistribution.map(item => item.year),
+    []
+  )
+
+  // Data for selected year (Recharts expects an array)
+  const yearData = useMemo(
+    () =>
+      studentDistribution.find(item => item.year === year)?.data ?? [],
+    [year]
+  )
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
       {/* Header + Filter */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-800">
@@ -35,7 +46,7 @@ const DistributionChart = () => {
 
           <select
             value={year}
-            onChange={(e) => setYear(e.target.value as '2025' | '2026')}
+            onChange={(e) => setYear(Number(e.target.value))}
             className="
               appearance-none
               pl-10 pr-10 py-2
@@ -49,11 +60,13 @@ const DistributionChart = () => {
               transition
             "
           >
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
           </select>
 
-          {/* Custom arrow */}
           <span className="absolute right-3 top-1/2 -translate-y-1/2
                            text-blue-600 pointer-events-none">
             ▾
@@ -64,7 +77,7 @@ const DistributionChart = () => {
       {/* Chart */}
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={studentDistribution[year]}>
+          <LineChart data={yearData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />

@@ -7,4 +7,5 @@ export type student = {
   pracs: Practical[];
   instructor: string;
   slug: string;
+
 };

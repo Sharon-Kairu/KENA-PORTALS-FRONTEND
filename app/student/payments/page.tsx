@@ -41,7 +41,7 @@ Balance: $${receipt.balance.toFixed(2)}
             {receipts.map((receipt) => (
             <div
                 key={receipt.receiptNumber}
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 w-full md:w-[480px] mx-auto"
+                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 w-full mx-auto"
             >
                 <div className="flex items-center space-x-4 mb-6">
                     <div className="rounded-full bg-gray-100 p-4 flex items-center justify-center">

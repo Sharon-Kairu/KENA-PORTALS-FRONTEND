@@ -66,8 +66,8 @@ export const practicals: Practical[] = [
       { title: "3. Image Generation", date: "2024-09-05", status: "Completed", comment: "Fair" },
       { title: "4. Video Generation", date: "2024-09-07", status: "Completed", comment: "Excellent" },
       // Pending (2)
-      { title: "5. Research & Writing Assistants", date: "N/A", status: "Pending", comment: "N/A" },
-      { title: "6. AI Models Overview", date: "N/A", status: "Pending", comment: "N/A" },
+      { title: "5. Research & Writing Assistants", date: "N/A", status: "Completed", comment: "N/A" },
+      { title: "6. AI Models Overview", date: "N/A", status: "Completed", comment: "N/A" },
     ],
   },
 ]
