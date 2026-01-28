@@ -8,7 +8,7 @@ import { FaChalkboardTeacher } from 'react-icons/fa'
 
 const DashCards = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
       {/* Active Students */}
       <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
         <div className="flex items-center justify-between">

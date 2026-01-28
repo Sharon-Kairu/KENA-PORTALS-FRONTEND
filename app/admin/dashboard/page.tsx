@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import DashCards from '../components/DashCards'
 import DashCharts from '../components/DashCharts'
 import DistributionChart from '@/app/components/DistributionChart'
@@ -7,6 +7,26 @@ import { pendindReceipts } from '../../data/pendingReceipts'
 
 
 const page = () => {
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+      const data = await fetch(
+      `${process.env.NEXT_PUBLIC_API_HOST}/auth/me/`,
+      { credentials: 'include' } 
+      ).then(res => res.json())
+      
+      console.log('Fetched user data:', data)
+
+
+      setUser(data)
+      } catch (err) {
+      console.error('Failed to fetch user', err)
+      }
+   }
+    fetchUser()
+    }, [])
   
   return (
     <div className='ml-0 lg:ml-64'>
@@ -17,7 +37,11 @@ const page = () => {
                    border-b border-gray-200 shadow-sm"
       >
         <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-green-600 mt-1">Welcome, Chris Thairu</p>
+        {user && (
+          <p className="text-green-600 mt-1">
+          Welcome, {user.first_name} {user.last_name}
+          </p>
+        )}
       </div>
       {/*Content*/}
       <div className='pt-24 md:pt-28 p-4 md:p-6 space-y-6'>

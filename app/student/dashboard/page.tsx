@@ -1,7 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { AiFillMoneyCollect } from 'react-icons/ai'
 import { FiCalendar, FiUserCheck, FiClock, FiMessageSquare } from 'react-icons/fi'
+import apiService from '@/app/services/apiService'
 import ScheduleClass from '@/app/components/modals/ScheduleClass'
 import StudentComment from '@/app/components/modals/StudentComment'
 
@@ -12,6 +13,22 @@ const data = [
 ]
 
 const Page = () => {
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await apiService.getWithToken('/students/me/')
+        console.log("Fetched user data:", data)
+        setUser(data)
+      } catch (err) {
+        console.error("Failed to fetch user", err)
+      }
+    }
+
+    fetchUser()
+  }, [])
+  
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [showCommentModal, setShowCommentModal] = useState(false)
 
@@ -25,7 +42,7 @@ const Page = () => {
           Student Dashboard
         </h1>
         <p className="text-green-600 text-md md:text-lg mt-1">
-          Welcome, Sharon Kairu
+          Welcome,{user?.first_name} {user?.last_name}
         </p>
       </div>
 
@@ -33,7 +50,7 @@ const Page = () => {
       {/* Content */}
       <div className="p-4 md:p-6 mt-24 md:mt-28 space-y-6">
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
           {/* Fees Paid */}
           <div className="bg-blue-50 p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
@@ -49,13 +66,43 @@ const Page = () => {
           {/* Exam Countdown */}
           <div className="bg-green-50 p-6 rounded-xl shadow-sm border border-green-100">
             <div className="flex items-center justify-between">
-              <h2 className="text-green-700 font-semibold text-lg">Days to Final Exam</h2>
+              <h2 className="text-green-700 font-semibold text-lg">
+                Days to Final Exam
+              </h2>
               <div className="w-12 h-12 flex items-center justify-center rounded-full bg-green-100 text-green-700">
                 <FiCalendar size={22} />
               </div>
             </div>
-            <p className="mt-4 text-3xl font-bold text-green-800">18 Days</p>
-            <p className="text-sm text-green-600 mt-1">Keep practicing, you’re almost there 🚗</p>
+
+            {user?.exam_date ? (() => {
+              const examDate = new Date(user.exam_date);
+              const currentDate = new Date();
+              const timeDiff = examDate.getTime() - currentDate.getTime();
+              const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+              return (
+                <>
+                  <p className="mt-4 text-3xl font-bold text-green-800">
+                    {daysDiff} Days
+                  </p>
+                  <p className='mt-4 text-sm font-bold text-green-800'>
+                    Exam Date: {user.exam_date}
+                  </p>
+                  <p className="mt-2 text-sm text-green-700">
+                    Keep practicing 🚗
+                  </p>
+                </>
+              );
+            })() : (
+              <>
+                <p className="mt-4 text-xl font-semibold text-green-800">
+                  Exam date not set
+                </p>
+                <p className="mt-2 text-sm text-green-700">
+                  Keep going, you’re on the right track!
+                </p>
+              </>
+            )}
           </div>
 
           

@@ -1,19 +1,115 @@
-import React from 'react'
+'use client';
+import React, { useState, useEffect } from 'react';
+import apiService from '@/app/services/apiService';
+import next from 'next';
+import NewAdmin from '../components/NewAdmin';
 
-const page = () => {
+const Page = () => {
+   const [user, setUser] = useState<any>(null)
+   
+     useEffect(() => {
+       const fetchUser = async () => {
+         try {
+         const data = await fetch(
+         `${process.env.NEXT_PUBLIC_API_HOST}/auth/me/`,
+         { credentials: 'include' } // 🔥 cookies sent automatically
+         ).then(res => res.json())
+         console.log('Fetched user data:', data)
+         setUser(data)
+         } catch (err) {
+         console.error('Failed to fetch user', err)
+         }
+      }
+       fetchUser()
+       }, [])
+
+  // State for instructor
+  const [instructorData, setInstructorData] = useState({
+    username: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: '',
+    role: 'instructor',
+    category: 5, // Default course ID
+    national_id: '',
+    instructor_id: '',
+    date_of_birth: '',
+    nok_first_name: '',
+    nok_last_name: '',
+    nok_email: '',
+    nok_phone: '',
+    nok_relationship: '',
+    nok_occupation: '',
+  });
+
+
+  // Generic handler for instructor fields
+  const handleInstructorChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setInstructorData((prev) => ({ ...prev, [name]: value }));
+  };
+
+
+  // Form submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      user: {
+        username: instructorData.username,
+        password: instructorData.password,
+        first_name: instructorData.first_name,
+        last_name: instructorData.last_name,
+        email: instructorData.email,
+        phone_number: instructorData.phone_number,
+        role: instructorData.role,
+  
+      },
+      category: Number(instructorData.category), 
+      national_id: instructorData.national_id,
+      instructor_id: instructorData.instructor_id,
+      date_of_birth: instructorData.date_of_birth,
+      nok_first_name: instructorData.nok_first_name,
+      nok_last_name: instructorData.nok_last_name,
+      nok_email: instructorData.nok_email,
+      nok_phone: instructorData.nok_phone,
+      nok_relationship: instructorData.nok_relationship,
+      nok_occupation: instructorData.nok_occupation,
+    };
+
+    try {
+      const res = await apiService.postWithToken('/instructors/register/', payload);
+      console.log('Instructor registered:', res);
+      alert('Instructor registered successfully!');
+    } catch (err) {
+      console.error('Error registering instructor:', err);
+      alert('Failed to register instructor. Check console for details.');
+    }
+  };
+  
+
   return (
-    <div className='ml-0 lg:ml-64'>
-        {/* Header */}
-      <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-40
-                      h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6
-                      border-b border-gray-200 shadow-sm">
+    <div className="ml-0 lg:ml-64">
+      {/* Header */}
+      <div
+        className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-40
+                    h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6
+                    border-b border-gray-200 shadow-sm"
+      >
         <h1 className="text-3xl font-bold text-gray-800">Add Instructor</h1>
         <p className="text-green-600 mt-1">Welcome, Chris Thairu</p>
       </div>
-      {/*Content*/}
-      <div className="pt-24 md:pt-28 p-4 md:p-6 space-y-6">
-        <form className="bg-white rounded-2xl p-8 shadow border border-blue-200 space-y-8">
 
+      {/* Content */}
+      <div className="pt-24 md:pt-28 p-4 md:p-6 space-y-6">
+        <form
+          className="bg-white rounded-2xl p-8 shadow border border-blue-200 space-y-8"
+          onSubmit={handleSubmit}
+        >
           {/* ================= INSTRUCTOR DETAILS ================= */}
           <section>
             <h2 className="text-xl font-semibold text-gray-800 mb-6">
@@ -21,7 +117,148 @@ const page = () => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={instructorData.username}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
 
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={instructorData.password}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={instructorData.first_name}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  name="last_name"
+                  value={instructorData.last_name}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={instructorData.email}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="phone_number"
+                  value={instructorData.phone_number}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Category
+                </label>
+                <select
+                  name="category"
+                  value={instructorData.category}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                >
+                  <option value={5}>Driving</option>
+                  <option value={6}>Computer</option>
+                  <option value={7}>AI</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  National ID
+                </label>
+                <input
+                  type="text"
+                  name="national_id"
+                  value={instructorData.national_id}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Instructor License Number
+                </label>
+                <input
+                  type="text"
+                  name="instructor_id"
+                  value={instructorData.instructor_id}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  name="date_of_birth"
+                  value={instructorData.date_of_birth}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* ================= NEXT OF KIN ================= */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6">
+              Next of Kin Details
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* First Name */}
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
@@ -29,17 +266,23 @@ const page = () => {
                 </label>
                 <input
                   type="text"
+                  name="nok_first_name"
+                  value={instructorData.nok_first_name}
+                  onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
 
-              {/* Second Name */}
+              {/* Last Name */}
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
-                  Second Name
+                  Last Name
                 </label>
                 <input
                   type="text"
+                  name="nok_last_name"
+                  value={instructorData.nok_last_name}
+                  onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
@@ -51,6 +294,9 @@ const page = () => {
                 </label>
                 <input
                   type="email"
+                  name="nok_email"
+                  value={instructorData.nok_email}
+                  onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
@@ -62,81 +308,40 @@ const page = () => {
                 </label>
                 <input
                   type="tel"
+                  name="nok_phone"
+                  value={instructorData.nok_phone}
+                  onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
 
-              {/* Nationality */}
+              {/* Relationship */}
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
-                  Nationality
+                  Relationship
                 </label>
                 <input
                   type="text"
+                  name="nok_relationship"
+                  value={instructorData.nok_relationship}
+                  onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
 
-              {/* Date of Birth */}
+              {/* Occupation */}
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                />
-              </div>
-
-              {/* ID Number */}
-              <div>
-                <label className="block text-sm font-medium text-blue-600 mb-1">
-                  ID Number
+                  Occupation
                 </label>
                 <input
                   type="text"
+                  name="nok_occupation"
+                  value={instructorData.nok_occupation}
+                  onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
-
-              {/* Instructor License Number */}
-              <div>
-                <label className="block text-sm font-medium text-blue-600 mb-1">
-                  Instructor License Number
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                />
-              </div>
-
-            </div>
-          </section>
-          {/* ================= NEXT OF KIN ================= */}
-          <section>
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">
-              Next of Kin Details
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {[
-                'First Name',
-                'Second Name',
-                'Email',
-                'Phone Number',
-                'Relationship',
-                'Occupation',
-              ].map((label) => (
-                <div key={label}>
-                  <label className="block text-sm font-medium text-blue-600 mb-1">
-                    {label}
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300  rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                  />
-                </div>
-              ))}
             </div>
           </section>
 
@@ -149,12 +354,13 @@ const page = () => {
               Register Instructor
             </button>
           </div>
-
         </form>
-      </div>
-      
-    </div>
-  )
-}
 
-export default page
+        <NewAdmin />
+        
+      </div>
+    </div>
+  );
+};
+
+export default Page;
