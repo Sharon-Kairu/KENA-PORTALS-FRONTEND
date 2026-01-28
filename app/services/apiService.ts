@@ -18,25 +18,21 @@ const apiService = {
   },
   postWithToken: async (url: string, data: any) => {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}${url}`, {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json',
-    
-    },
-    credentials: 'include',
-    body: JSON.stringify(data),
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     });
-
 
     if (!res.ok) {
       const errData = await res.json();
-      console.error('Server error:', errData); // 👈 see full response
-      throw new Error(errData.detail || JSON.stringify(errData));
+      throw new Error(errData.detail || errData.error || 'Unknown error');
     }
 
-
     return res.json();
-    },
+  },
 
 
     // Example GET with token

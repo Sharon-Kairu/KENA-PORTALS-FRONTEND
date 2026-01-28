@@ -11,10 +11,13 @@ const data = [
   { id: 2, date: '2025-12-17', practical: 'Practical Two', status: 'pass',comment:'Very Good' },
   { id: 3, date: 'N/A', practical: 'Reverse', status: 'pending' ,comment:'N/A' },
 ]
+interface PaymentData{
+  totalfees:string,
+  feespaid:string
+}
 
 const Page = () => {
   const [user, setUser] = useState<any>(null)
-
   useEffect(() => {
     const fetchUser = async () => {
       try {

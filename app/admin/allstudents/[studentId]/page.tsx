@@ -2,13 +2,31 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import apiService from '@/app/services/apiService'
+import { FaReceipt } from 'react-icons/fa6'
+import { generateReceipt } from '@/app/utils/receiptGenerator'
 
+
+interface PaymentData {
+  summary: {
+    total_fees: string
+    total_paid: string
+    balance: string
+  }
+  payments: Array<{
+    id: number
+    amount: string
+    payment_date: string
+    payment_method: string
+    transaction_code: string | null
+    receipt_number: string
+  }>
+}
 export default function StudentDetailsPage() {
   const params = useParams()
   const router = useRouter()
   const studentId = params.studentId as string
-
   const [studentData, setStudentData] = useState<any>(null)
+  const payments = studentData?.payments as PaymentData | null
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -117,6 +135,32 @@ export default function StudentDetailsPage() {
 
   const student = studentData.student
   const enrollment = studentData.enrollment
+
+  const downloadReceipt = (payment: any) => {
+    const user = student?.user || {}
+
+    const receiptData = {
+      receipt_number: payment.receipt_number,
+      payment_date: payment.payment_date,
+      amount: payment.amount,
+      payment_method: payment.payment_method,
+      transaction_code: payment.transaction_code,
+      student: {
+        student_id: student?.student_id || 'N/A',
+        name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'N/A',
+        email: user.email || 'N/A',
+        phone: user.phone_number || 'N/A'
+      },
+      payments_summary: {
+        total_fees: payments?.summary.total_fees || '0',
+        total_paid: payments?.summary.total_paid || '0',
+        balance: payments?.summary.balance || '0'
+      }
+    }
+
+    console.log('Receipt data:', receiptData) // For debugging
+    generateReceipt(receiptData)
+  }
 
   return (
     <div className="ml-0 lg:ml-64">
@@ -411,6 +455,122 @@ export default function StudentDetailsPage() {
             </div>
           </div>
         )}
+        {/* Payment Information */}
+{payments && (
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
+      Payment Information
+    </h2>
+
+    {/* Payment Summary */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="bg-blue-50 rounded-lg p-4">
+        <p className="text-sm text-gray-600 mb-1">Total Fees</p>
+        <p className="text-2xl font-bold text-blue-600">
+          KSh {parseFloat(payments.summary.total_fees).toLocaleString('en-KE', { 
+            minimumFractionDigits: 2 
+          })}
+        </p>
+      </div>
+      <div className="bg-green-50 rounded-lg p-4">
+        <p className="text-sm text-gray-600 mb-1">Total Paid</p>
+        <p className="text-2xl font-bold text-green-600">
+          KSh {parseFloat(payments.summary.total_paid).toLocaleString('en-KE', { 
+            minimumFractionDigits: 2 
+          })}
+        </p>
+      </div>
+      <div className={`rounded-lg p-4 ${
+        parseFloat(payments.summary.balance) > 0 
+          ? 'bg-orange-50' 
+          : 'bg-green-50'
+      }`}>
+        <p className="text-sm text-gray-600 mb-1">Balance</p>
+        <p className={`text-2xl font-bold ${
+          parseFloat(payments.summary.balance) > 0 
+            ? 'text-orange-600' 
+            : 'text-green-600'
+        }`}>
+          KSh {parseFloat(payments.summary.balance).toLocaleString('en-KE', { 
+            minimumFractionDigits: 2 
+          })}
+        </p>
+      </div>
+    </div>
+
+    {/* Payment History */}
+    <div>
+      <h3 className="font-semibold text-gray-700 mb-3">Payment History</h3>
+      {payments.payments.length === 0 ? (
+        <p className="text-gray-500 text-center py-8">No payments recorded yet</p>
+      ) : (
+        <div className="space-y-4">
+          {payments.payments.map((payment) => (
+            <div
+              key={payment.id}
+              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FaReceipt className="text-blue-600" />
+                    <span className="font-semibold text-blue-600">
+                      {payment.receipt_number}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-500">Amount:</span>
+                      <span className="ml-2 font-semibold text-green-600">
+                        KSh {parseFloat(payment.amount).toLocaleString('en-KE', { 
+                          minimumFractionDigits: 2 
+                        })}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Date:</span>
+                      <span className="ml-2 text-gray-700">
+                        {new Date(payment.payment_date).toLocaleDateString('en-KE')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Method:</span>
+                      <span className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                        payment.payment_method === 'mpesa' 
+                          ? 'bg-green-100 text-green-800'
+                          : payment.payment_method === 'cash'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-purple-100 text-purple-800'
+                      }`}>
+                        {payment.payment_method.toUpperCase()}
+                      </span>
+                    </div>
+                    {payment.transaction_code && (
+                      <div>
+                        <span className="text-gray-500">Code:</span>
+                        <span className="ml-2 text-gray-700 font-mono text-xs">
+                          {payment.transaction_code}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => downloadReceipt(payment)}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm font-medium whitespace-nowrap"
+                >
+                  Download Receipt
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
       </div>
     </div>
   )
