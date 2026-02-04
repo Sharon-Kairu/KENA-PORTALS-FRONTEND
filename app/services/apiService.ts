@@ -28,6 +28,7 @@ const apiService = {
 
     if (!res.ok) {
       const errData = await res.json();
+      console.error('API Error Response:', errData); 
       throw new Error(errData.detail || errData.error || 'Unknown error');
     }
 

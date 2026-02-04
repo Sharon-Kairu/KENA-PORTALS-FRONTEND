@@ -1,8 +1,20 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import apiService from '../../services/apiService'
 
+type Instructor={
+  id:string,
+  name:string,
+  course:string,
+  category?:string|null
+}
+
 const page = () => {
+  const [drivingTheoryInstructors, setDrivingTheoryInstructors] = useState<Instructor[]>([])
+  const [drivingPracticalInstructors, setDrivingPracticalInstructors] = useState<Instructor[]>([])
+  const [computerInstructors, setComputerInstructors] = useState<Instructor[]>([])
+  const [aiInstructors, setAiInstructors] = useState<Instructor[]>([])
+
   const [student, setStudent] = useState({
     firstName: '',
     secondName: '',
@@ -34,6 +46,36 @@ const page = () => {
     computer: false,
     ai: false,
   })
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const res = await apiService.getWithToken('/instructors/get_instructors/')
+
+        const instructors: Instructor[] = res.data
+
+        const driving = instructors.filter((inst: Instructor) => inst.course === "driving")
+        const computer = instructors.filter((inst: Instructor) => inst.course === "computer")
+        const ai = instructors.filter((inst: Instructor) => inst.course === "ai")
+
+        setDrivingTheoryInstructors(
+          driving.filter((inst: Instructor) => inst.category === "theory")
+        )
+
+        setDrivingPracticalInstructors(
+          driving.filter((inst: Instructor) => inst.category === "practical")
+        )
+
+        setComputerInstructors(computer)
+        setAiInstructors(ai)
+
+      } catch (error) {
+        console.log("Error fetching instructors:", error)
+      }
+    }
+
+    fetchInstructors()
+  }, [])
+
 
   const mode: 'standalone' | 'subscription' | null =
     standaloneCourses.computer || standaloneCourses.ai
@@ -41,7 +83,8 @@ const page = () => {
       : subscription
       ? 'subscription'
       : null
-
+  
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -49,14 +92,14 @@ const page = () => {
     const selectedCourses: number[] = []
 
     if (mode === 'standalone') {
-      if (standaloneCourses.computer) selectedCourses.push(5)  // CHANGED: 1 -> 5
-      if (standaloneCourses.ai) selectedCourses.push(6)        // CHANGED: 2 -> 6
+      if (standaloneCourses.computer) selectedCourses.push(5)  
+      if (standaloneCourses.ai) selectedCourses.push(6)        
     }
 
     if (mode === 'subscription') {
-      if (subscriptionCourses.driving) selectedCourses.push(7)   // CHANGED: 3 -> 7
-      if (subscriptionCourses.computer) selectedCourses.push(5)  // CHANGED: 1 -> 5
-      if (subscriptionCourses.ai) selectedCourses.push(6)        // CHANGED: 2 -> 6
+      if (subscriptionCourses.driving) selectedCourses.push(7)   
+      if (subscriptionCourses.computer) selectedCourses.push(5) 
+      if (subscriptionCourses.ai) selectedCourses.push(6)       
     }
 
     const payload = {

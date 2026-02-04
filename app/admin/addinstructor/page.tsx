@@ -25,14 +25,14 @@ const Page = () => {
 
   // State for instructor
   const [instructorData, setInstructorData] = useState({
-    username: '',
     password: '',
     first_name: '',
     last_name: '',
     email: '',
     phone_number: '',
     role: 'instructor',
-    category: 5, // Default course ID
+    course: '', 
+    category:'',
     national_id: '',
     instructor_id: '',
     date_of_birth: '',
@@ -60,7 +60,6 @@ const Page = () => {
 
     const payload = {
       user: {
-        username: instructorData.username,
         password: instructorData.password,
         first_name: instructorData.first_name,
         last_name: instructorData.last_name,
@@ -69,7 +68,8 @@ const Page = () => {
         role: instructorData.role,
   
       },
-      category: Number(instructorData.category), 
+      course: (instructorData.course), 
+      category:(instructorData.category),
       national_id: instructorData.national_id,
       instructor_id: instructorData.instructor_id,
       date_of_birth: instructorData.date_of_birth,
@@ -85,11 +85,14 @@ const Page = () => {
       const res = await apiService.postWithToken('/instructors/register/', payload);
       console.log('Instructor registered:', res);
       alert('Instructor registered successfully!');
-    } catch (err) {
-      console.error('Error registering instructor:', err);
-      alert('Failed to register instructor. Check console for details.');
-    }
-  };
+    } catch (err:any) {
+      console.error('Error:', err);
+  
+      if (err.response) {
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+      }
+  };}
   
 
   return (
@@ -117,31 +120,8 @@ const Page = () => {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-blue-600 mb-1">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={instructorData.username}
-                  onChange={handleInstructorChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-blue-600 mb-1">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={instructorData.password}
-                  onChange={handleInstructorChange}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                />
-              </div>
+              
+             
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
@@ -198,6 +178,23 @@ const Page = () => {
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Course
+                </label>
+                <select
+                  name="course"
+                  value={instructorData.course}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                ><option value={''}>Select Course</option>
+                  <option value={'ai'}>AI</option>
+                  <option value={'computer'}>Computer</option>
+                  <option value={'driving'}>Driving</option>
+                </select>
+              </div>
+
+              {instructorData.course==='driving' && (
+                <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
                   Category
                 </label>
                 <select
@@ -206,11 +203,13 @@ const Page = () => {
                   onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 >
-                  <option value={5}>Driving</option>
-                  <option value={6}>Computer</option>
-                  <option value={7}>AI</option>
+                  <option value={''}>Select Category</option>
+                  <option value={'theory'}>Theory</option>
+                  <option value={'practical'}>Practical</option>
+                  
                 </select>
               </div>
+              )} 
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
@@ -224,8 +223,8 @@ const Page = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
-
-              <div>
+              {instructorData.course==='driving'&&(
+                <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
                   Instructor License Number
                 </label>
@@ -237,6 +236,8 @@ const Page = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
               </div>
+              )}
+              
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">
@@ -246,6 +247,19 @@ const Page = () => {
                   type="date"
                   name="date_of_birth"
                   value={instructorData.date_of_birth}
+                  onChange={handleInstructorChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+
+               <div>
+                <label className="block text-sm font-medium text-blue-600 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={instructorData.password}
                   onChange={handleInstructorChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
                 />
