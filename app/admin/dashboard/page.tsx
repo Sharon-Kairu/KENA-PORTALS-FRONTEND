@@ -3,6 +3,7 @@ import React,{useState,useEffect} from 'react'
 import DashCards from '../components/DashCards'
 import DashCharts from '../components/DashCharts'
 import DistributionChart from '@/app/components/DistributionChart'
+import RequestAndComments from '../components/RequestAndComments'
 import { pendindReceipts } from '../../data/pendingReceipts'
 
 
@@ -122,6 +123,7 @@ const page = () => {
             </table>
           </div>
         </div>
+        <RequestAndComments/>
 
         </div>
 

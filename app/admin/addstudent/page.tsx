@@ -1,13 +1,14 @@
 'use client'
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import apiService from '../../services/apiService'
 
-type Instructor={
-  id:string,
-  name:string,
-  course:string,
-  category?:string|null
+export type Instructor = {
+  id: number
+  full_name: string
+  course: string
+  category?: string | null
 }
+
 
 const page = () => {
   const [drivingTheoryInstructors, setDrivingTheoryInstructors] = useState<Instructor[]>([])
@@ -39,19 +40,33 @@ const page = () => {
     ai: false,
   })
 
-  // CHANGED: Store as number or empty string
+  // NEW: Store selected instructors
+  const [selectedInstructors, setSelectedInstructors] = useState({
+    drivingTheory: '',
+    drivingPractical: '',
+    computer: '',
+    ai: '',
+  })
+
   const [subscription, setSubscription] = useState<number | ''>('')
   const [subscriptionCourses, setSubscriptionCourses] = useState({
     driving: false,
     computer: false,
     ai: false,
   })
+
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
         const res = await apiService.getWithToken('/instructors/get_instructors/')
+        console.log("FULL RESPONSE:", res)
+        console.log("RES.DATA:", res.data)
+        console.log("IS ARRAY?", Array.isArray(res.data))
 
-        const instructors: Instructor[] = res.data
+
+        const instructors: Instructor[] = res ?? []
+
+        console.log(instructors)
 
         const driving = instructors.filter((inst: Instructor) => inst.course === "driving")
         const computer = instructors.filter((inst: Instructor) => inst.course === "computer")
@@ -76,30 +91,100 @@ const page = () => {
     fetchInstructors()
   }, [])
 
-
   const mode: 'standalone' | 'subscription' | null =
     standaloneCourses.computer || standaloneCourses.ai
       ? 'standalone'
       : subscription
       ? 'subscription'
       : null
-  
-  
+
+  // NEW: Helper function to determine which courses need instructors
+  const needsInstructorSelection = () => {
+    const needs = {
+      drivingTheory: false,
+      drivingPractical: false,
+      computer: false,
+      ai: false,
+    }
+
+    if (mode === 'standalone') {
+      needs.computer = standaloneCourses.computer
+      needs.ai = standaloneCourses.ai
+    }
+
+    if (mode === 'subscription' && subscription) {
+      // All subscription plans include driving
+      if (subscription === 1 || subscription === 2 || subscription === 3) {
+        needs.drivingTheory = subscriptionCourses.driving
+        needs.drivingPractical = subscriptionCourses.driving
+      }
+
+      // Gold and Platinum can have computer
+      if (subscription === 2 || subscription === 3) {
+        needs.computer = subscriptionCourses.computer
+      }
+
+      // Only Platinum can have AI
+      if (subscription === 3) {
+        needs.ai = subscriptionCourses.ai
+      }
+    }
+
+    return needs
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // collect selected courses
+    // Collect selected courses
     const selectedCourses: number[] = []
 
     if (mode === 'standalone') {
-      if (standaloneCourses.computer) selectedCourses.push(5)  
-      if (standaloneCourses.ai) selectedCourses.push(6)        
+      if (standaloneCourses.computer) selectedCourses.push(5)
+      if (standaloneCourses.ai) selectedCourses.push(6)
     }
 
     if (mode === 'subscription') {
-      if (subscriptionCourses.driving) selectedCourses.push(7)   
-      if (subscriptionCourses.computer) selectedCourses.push(5) 
-      if (subscriptionCourses.ai) selectedCourses.push(6)       
+      if (subscriptionCourses.driving) selectedCourses.push(7)
+      if (subscriptionCourses.computer) selectedCourses.push(5)
+      if (subscriptionCourses.ai) selectedCourses.push(6)
+    }
+
+    // NEW: Prepare instructor assignments
+    const instructorAssignments = []
+
+    const needs = needsInstructorSelection()
+
+    if (needs.drivingTheory && selectedInstructors.drivingTheory) {
+      instructorAssignments.push({
+        course_id: 7, // driving course ID
+        instructor_id: selectedInstructors.drivingTheory,
+        category: 'theory'
+      })
+    }
+
+    if (needs.drivingPractical && selectedInstructors.drivingPractical) {
+      instructorAssignments.push({
+        course_id: 7,
+        instructor_id: selectedInstructors.drivingPractical,
+        category: 'practical'
+      })
+    }
+
+    if (needs.computer && selectedInstructors.computer) {
+      instructorAssignments.push({
+        course_id: 5,
+        instructor_id: selectedInstructors.computer,
+        category: null
+      })
+    }
+
+    if (needs.ai && selectedInstructors.ai) {
+      instructorAssignments.push({
+        course_id: 6,
+        instructor_id: selectedInstructors.ai,
+        category: null
+      })
     }
 
     const payload = {
@@ -112,8 +197,9 @@ const page = () => {
         password: student.password,
         id_number: student.idNumber,
       },
-      subscription_plan: subscription || null, 
+      subscription_plan: subscription || null,
       courses: selectedCourses,
+      instructor_assignments: instructorAssignments, 
       nok_first_name: student.nokFirstName,
       nok_last_name: student.nokSecondName,
       nok_email: student.nokEmail,
@@ -123,12 +209,36 @@ const page = () => {
       total_fees: student.totalFees,
     }
 
-    console.log('Payload:', payload)  // Debug log
+    console.log('Payload:', payload)
 
     try {
       const res = await apiService.postWithToken('/enrollments/enroll', payload)
       console.log('Student created:', res)
       alert('Student created successfully')
+      
+      // Reset form
+      setStudent({
+        firstName: '',
+        secondName: '',
+        email: '',
+        phoneNumber: '',
+        nationality: '',
+        dateOfBirth: '',
+        idNumber: '',
+        gender: '',
+        password: '',
+        nokFirstName: '',
+        nokSecondName: '',
+        nokEmail: '',
+        nokPhone: '',
+        nokRelationship: '',
+        nokOccupation: '',
+        totalFees: '',
+      })
+      setStandaloneCourses({ computer: false, ai: false })
+      setSubscription('')
+      setSubscriptionCourses({ driving: false, computer: false, ai: false })
+      setSelectedInstructors({ drivingTheory: '', drivingPractical: '', computer: '', ai: '' })
     } catch (err: any) {
       console.error(err)
       alert(err.message || 'Failed to create student')
@@ -138,6 +248,13 @@ const page = () => {
   const handleInputChange = (field: string, value: string) => {
     setStudent({ ...student, [field]: value })
   }
+
+  // NEW: Handle instructor selection
+  const handleInstructorChange = (field: keyof typeof selectedInstructors, value: string) => {
+    setSelectedInstructors({ ...selectedInstructors, [field]: value })
+  }
+
+  const needs = needsInstructorSelection()
 
   return (
     <div className="ml-0 lg:ml-64">
@@ -162,6 +279,7 @@ const page = () => {
                   value={student.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
@@ -172,26 +290,29 @@ const page = () => {
                   value={student.secondName}
                   onChange={(e) => handleInputChange('secondName', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   value={student.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">Phone Number</label>
                 <input
-                  type="text"
+                  type="tel"
                   value={student.phoneNumber}
                   onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
@@ -222,6 +343,7 @@ const page = () => {
                   value={student.idNumber}
                   onChange={(e) => handleInputChange('idNumber', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
@@ -231,6 +353,7 @@ const page = () => {
                   value={student.gender}
                   onChange={(e) => handleInputChange('gender', e.target.value)}
                   className="w-full border border-blue-500 rounded-lg px-3 py-2"
+                  required
                 >
                   <option value="">Select gender</option>
                   <option>Male</option>
@@ -254,6 +377,7 @@ const page = () => {
                   value={student.nokFirstName}
                   onChange={(e) => handleInputChange('nokFirstName', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
@@ -264,26 +388,29 @@ const page = () => {
                   value={student.nokSecondName}
                   onChange={(e) => handleInputChange('nokSecondName', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   value={student.nokEmail}
                   onChange={(e) => handleInputChange('nokEmail', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">Phone Number</label>
                 <input
-                  type="text"
+                  type="tel"
                   value={student.nokPhone}
                   onChange={(e) => handleInputChange('nokPhone', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
@@ -294,6 +421,7 @@ const page = () => {
                   value={student.nokRelationship}
                   onChange={(e) => handleInputChange('nokRelationship', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  required
                 />
               </div>
 
@@ -326,7 +454,7 @@ const page = () => {
               <p className="font-medium text-blue-700 mb-3">Standalone Courses</p>
 
               {['computer', 'ai'].map((course) => (
-                <label key={course} className="flex items-center gap-2 text-blue-700">
+                <label key={course} className="flex items-center gap-2 text-blue-700 mb-2">
                   <input
                     type="checkbox"
                     checked={standaloneCourses[course as keyof typeof standaloneCourses]}
@@ -344,7 +472,7 @@ const page = () => {
 
             <div className="text-center text-gray-400 font-semibold my-6">OR</div>
 
-            {/* Subscription - UPDATED */}
+            {/* Subscription */}
             <div
               className={`p-5 rounded-xl border transition ${
                 mode === 'standalone'
@@ -357,7 +485,7 @@ const page = () => {
               <select
                 value={subscription}
                 onChange={(e) => {
-                  const value = e.target.value ? Number(e.target.value) : ''  // CHANGED: Convert to number
+                  const value = e.target.value ? Number(e.target.value) : ''
                   setSubscription(value)
 
                   if (!value) {
@@ -392,7 +520,7 @@ const page = () => {
 
                   {subscription === 2 && (
                     <>
-                      <label className="flex gap-2">
+                      <label className="flex gap-2 mb-2">
                         <input checked disabled type="checkbox" /> Driving (Required)
                       </label>
                       <label className="flex gap-2">
@@ -413,7 +541,7 @@ const page = () => {
 
                   {subscription === 3 &&
                     ['driving', 'computer', 'ai'].map((course) => (
-                      <label key={course} className="flex gap-2">
+                      <label key={course} className="flex gap-2 mb-2">
                         <input
                           type="checkbox"
                           checked={subscriptionCourses[course as keyof typeof subscriptionCourses]}
@@ -431,6 +559,103 @@ const page = () => {
               )}
             </div>
 
+            {/* NEW: INSTRUCTOR SELECTION SECTION */}
+            {(needs.drivingTheory || needs.drivingPractical || needs.computer || needs.ai) && (
+              <div className="mt-6 p-5 bg-green-50 border border-green-300 rounded-xl">
+                <h3 className="text-lg font-semibold text-green-700 mb-4">Assign Instructors</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Driving Theory Instructor */}
+                  {needs.drivingTheory && (
+                    <div>
+                      <label className="block text-sm font-medium text-green-700 mb-1">
+                        Driving Theory Instructor *
+                      </label>
+                      <select
+                        value={selectedInstructors.drivingTheory}
+                        onChange={(e) => handleInstructorChange('drivingTheory', e.target.value)}
+                        className="w-full border border-green-500 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 outline-none"
+                        required
+                      >
+                        <option value="">Select theory instructor</option>
+                        {drivingTheoryInstructors.map((instructor) => (
+                          <option key={instructor.id} value={instructor.id}>
+                            {instructor.full_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Driving Practical Instructor */}
+                  {needs.drivingPractical && (
+                    <div>
+                      <label className="block text-sm font-medium text-green-700 mb-1">
+                        Driving Practical Instructor *
+                      </label>
+                      <select
+                        value={selectedInstructors.drivingPractical}
+                        onChange={(e) => handleInstructorChange('drivingPractical', e.target.value)}
+                        className="w-full border border-green-500 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 outline-none"
+                        required
+                      >
+                        <option value="">Select practical instructor</option>
+                        {drivingPracticalInstructors.map((instructor) => (
+                          <option key={instructor.id} value={instructor.id}>
+                            {instructor.full_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Computer Instructor */}
+                  {needs.computer && (
+                    <div>
+                      <label className="block text-sm font-medium text-green-700 mb-1">
+                        Computer Instructor *
+                      </label>
+                      <select
+                        value={selectedInstructors.computer}
+                        onChange={(e) => handleInstructorChange('computer', e.target.value)}
+                        className="w-full border border-green-500 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 outline-none"
+                        required
+                      >
+                        <option value="">Select computer instructor</option>
+                        {computerInstructors.map((instructor) => (
+                          <option key={instructor.id} value={instructor.id}>
+                            {instructor.full_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* AI Instructor */}
+                  {needs.ai && (
+                    <div>
+                      <label className="block text-sm font-medium text-green-700 mb-1">
+                        AI Instructor *
+                      </label>
+                      <select
+                        value={selectedInstructors.ai}
+                        onChange={(e) => handleInstructorChange('ai', e.target.value)}
+                        className="w-full border border-green-500 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-400 outline-none"
+                        required
+                      >
+                        <option value="">Select AI instructor</option>
+                        {aiInstructors.map((instructor) => (
+                          <option key={instructor.id} value={instructor.id}>
+                            {instructor.full_name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
               <div>
                 <label className="block text-sm font-medium text-blue-600 mb-1">Total Fees</label>
@@ -439,16 +664,19 @@ const page = () => {
                   value={student.totalFees}
                   onChange={(e) => handleInputChange('totalFees', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-blue-600 mb-1">Student Password</label>
+                <label className="block text-sm font-medium text-blue-600 mb-1">Student Password *</label>
                 <input
                   type="password"
                   value={student.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
+                  minLength={6}
                 />
               </div>
             </div>
@@ -458,7 +686,7 @@ const page = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
             >
               Create Student
             </button>

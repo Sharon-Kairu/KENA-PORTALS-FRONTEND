@@ -45,14 +45,14 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center p-4  relative overflow-hidden">
       {/* Soft background glow */}
       <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-blue-500/20 blur-3xl" />
       <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-emerald-500/20 blur-3xl" />
 
       <div className="w-full max-w-md">
         {/* Card */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
+        <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
           {/* Header */}
           <div className="mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-white/80 text-xs">

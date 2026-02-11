@@ -11,10 +11,6 @@ const data = [
   { id: 2, date: '2025-12-17', practical: 'Practical Two', status: 'pass',comment:'Very Good' },
   { id: 3, date: 'N/A', practical: 'Reverse', status: 'pending' ,comment:'N/A' },
 ]
-interface PaymentData{
-  totalfees:string,
-  feespaid:string
-}
 
 const Page = () => {
   const [user, setUser] = useState<any>(null)
@@ -24,6 +20,12 @@ const Page = () => {
         const data = await apiService.getWithToken('/students/me/')
         console.log("Fetched user data:", data)
         setUser(data)
+
+        const total_fees=data.payments.summary.total_fees
+        const total_paid=data.payments.summary.total_paid
+        console.log(total_fees)
+        console.log("Total Paid" ,total_paid)
+
       } catch (err) {
         console.error("Failed to fetch user", err)
       }
@@ -62,8 +64,8 @@ const Page = () => {
                 <AiFillMoneyCollect size={22} />
               </div>
             </div>
-            <p className="mt-4 text-3xl font-bold text-blue-800">Ksh. 10,000</p>
-            <p className="text-sm text-blue-600 mt-1">of 13,750</p>
+            <p className="mt-4 text-3xl font-bold text-blue-800">Ksh. {user?.payments.summary.total_paid}</p>
+            <p className="text-sm text-blue-600 mt-1">of {user?.payments.summary.total_fees}</p>
           </div>
 
           {/* Exam Countdown */}
