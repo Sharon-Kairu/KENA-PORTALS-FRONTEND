@@ -1,11 +1,44 @@
-import React from 'react'
+'use client'
+import React, { useEffect, useState } from 'react'
 import { FiUser, FiClipboard, FiBarChart } from 'react-icons/fi'
+import apiService from '@/app/services/apiService'
+
+interface InstructorStudent {
+  student_id: number
+}
 
 const DashCards = () => {
+  const [studentCount, setStudentCount] = useState<number>(0)
+  const [loading, setLoading] = useState<boolean>(true)
+
+  useEffect(() => {
+    fetchStudentCount()
+  }, [])
+
+  const fetchStudentCount = async () => {
+    try {
+      setLoading(true)
+
+      const data = await apiService.getWithToken('/instructors/students/')
+
+      // Deduplicate students by student_id
+      const uniqueStudents = new Set<number>(
+        data.map((item: InstructorStudent) => item.student_id)
+      )
+
+      setStudentCount(uniqueStudents.size)
+    } catch (error) {
+      console.error('Failed to fetch instructor students:', error)
+      setStudentCount(0)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      
-      {/* Card 1 */}
+
+      {/* Card 1 – Current Students */}
       <div className="bg-gradient-to-br from-blue-50 to-blue-100
                       rounded-2xl shadow-sm hover:shadow-md transition
                       p-6 border border-blue-200">
@@ -19,14 +52,14 @@ const DashCards = () => {
         </div>
 
         <p className="text-4xl font-bold text-blue-800 mt-6">
-          125
+          {loading ? '—' : studentCount}
         </p>
         <p className="text-sm text-blue-600 mt-1">
-          Active learners enrolled
+          Students assigned to you
         </p>
       </div>
 
-      {/* Card 2 */}
+      {/* Card 2 – Exams */}
       <div className="bg-gradient-to-br from-green-50 to-green-100
                       rounded-2xl shadow-sm hover:shadow-md transition
                       p-6 border border-green-200">
@@ -47,7 +80,7 @@ const DashCards = () => {
         </p>
       </div>
 
-      {/* Card 3 – Performance Breakdown */}
+      {/* Card 3 – Performance */}
       <div className="bg-gradient-to-br from-yellow-50 to-yellow-100
                       rounded-2xl shadow-sm hover:shadow-md transition
                       p-6 border border-yellow-200">

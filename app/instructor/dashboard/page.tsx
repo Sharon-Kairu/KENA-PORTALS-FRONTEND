@@ -1,10 +1,31 @@
-import React from 'react'
+'use client'
+import React,{useState, useEffect} from 'react'
 import DashCards from '../components/DashCards'
 import { FiBarChart, FiAlertTriangle, FiExternalLink } from 'react-icons/fi'
 import { awayStudents } from '../../data/awayStudents'
 import DistributionChart from '@/app/components/DistributionChart'
 
 const page = () => {
+  const [user, setUser] = useState<any>(null)
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+      const data = await fetch(
+      `${process.env.NEXT_PUBLIC_API_HOST}/auth/me/`,
+      { credentials: 'include' } 
+      ).then(res => res.json())
+      
+      console.log('Fetched user data:', data)
+
+
+      setUser(data)
+      } catch (err) {
+      console.error('Failed to fetch user', err)
+      }
+    }
+    fetchUser()
+    }, [])
   return (
     <div className="ml-5 lg:ml-64">
 
@@ -16,7 +37,7 @@ const page = () => {
           Instructor Dashboard
         </h1>
         <p className="text-green-500 text-md md:text-lg mt-1">
-          Welcome, Instructor One
+          Welcome, {user?.first_name} {user?.last_name}
         </p>
       </div>
 

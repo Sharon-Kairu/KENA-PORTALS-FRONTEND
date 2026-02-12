@@ -5,7 +5,7 @@ interface GradePracticalProps {
   practicalName: string
   studentName: string
   onCancel: () => void
-  onGrade: (comment: 'Excellent' | 'Good' | 'Fair') => void
+  onGrade: (comment: 'excellent' | 'good' | 'fair') => void
 }
 
 const GradePractical = ({
@@ -14,12 +14,12 @@ const GradePractical = ({
   onCancel,
   onGrade,
 }: GradePracticalProps) => {
-  const [comment, setComment] = useState<'Excellent' | 'Good' | 'Fair'>('Good')
+  const [comment, setComment] = useState<'excellent' | 'good' | 'fair'>('good')
 
   const commentStyles = {
-    Excellent: 'border-green-300 bg-green-50 text-green-700',
-    Good: 'border-orange-300 bg-orange-50 text-orange-700',
-    Fair: 'border-yellow-300 bg-yellow-50 text-yellow-700',
+    excellent: 'border-green-300 bg-green-50 text-green-700',
+    good: 'border-orange-300 bg-orange-50 text-orange-700',
+    fair: 'border-yellow-300 bg-yellow-50 text-yellow-700',
   } as const
 
   return (
@@ -70,9 +70,9 @@ const GradePractical = ({
                       focus:outline-none focus:ring-2 focus:ring-offset-1
                       ${commentStyles[comment]}`}
         >
-          <option value="Excellent">Excellent</option>
-          <option value="Good">Good</option>
-          <option value="Fair">Fair</option>
+          <option value="excellent">Excellent</option>
+          <option value="good">Good</option>
+          <option value="fair">Fair</option>
         </select>
       </div>
 
@@ -95,7 +95,7 @@ const GradePractical = ({
                      hover:bg-green-700 active:scale-[0.98]
                      transition"
         >
-          Grade Practical
+          Grade Module
         </button>
       </div>
     </div>
