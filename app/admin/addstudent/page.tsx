@@ -1,6 +1,8 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import apiService from '../../services/apiService'
+import Toast, { ToastType } from '@/app/components/Toast'
 
 export type Instructor = {
   id: number
@@ -11,6 +13,9 @@ export type Instructor = {
 
 
 const page = () => {
+  const router = useRouter();
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [drivingTheoryInstructors, setDrivingTheoryInstructors] = useState<Instructor[]>([])
   const [drivingPracticalInstructors, setDrivingPracticalInstructors] = useState<Instructor[]>([])
   const [computerInstructors, setComputerInstructors] = useState<Instructor[]>([])
@@ -135,6 +140,74 @@ const page = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true);
+
+    // Frontend validation
+    const requiredPersonalFields = [
+      { field: 'firstName', label: 'First Name' },
+      { field: 'secondName', label: 'Second Name' },
+      { field: 'email', label: 'Email' },
+      { field: 'phoneNumber', label: 'Phone Number' },
+      { field: 'idNumber', label: 'ID Number' },
+      { field: 'gender', label: 'Gender' },
+      { field: 'password', label: 'Password' },
+    ];
+
+    const emptyPersonalFields = requiredPersonalFields.filter(
+      ({ field }) => !student[field as keyof typeof student]
+    );
+
+    if (emptyPersonalFields.length > 0) {
+      const fieldNames = emptyPersonalFields.map(f => f.label).join(', ');
+      setToast({
+        message: `Please fill in required personal fields: ${fieldNames}`,
+        type: 'error'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate NOK fields
+    const requiredNOKFields = [
+      { field: 'nokFirstName', label: 'NOK First Name' },
+      { field: 'nokSecondName', label: 'NOK Second Name' },
+      { field: 'nokPhone', label: 'NOK Phone' },
+      { field: 'nokRelationship', label: 'NOK Relationship' },
+    ];
+
+    const emptyNOKFields = requiredNOKFields.filter(
+      ({ field }) =>!student[field as keyof typeof student]
+    );
+
+    if (emptyNOKFields.length > 0) {
+      const fieldNames = emptyNOKFields.map(f => f.label).join(', ');
+      setToast({
+        message: `Please fill in required next of kin fields: ${fieldNames}`,
+        type: 'error'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate total fees
+    if (!student.totalFees || parseFloat(student.totalFees) <= 0) {
+      setToast({
+        message: 'Please enter valid total fees',
+        type: 'error'
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate course selection
+    if (!mode) {
+      setToast({
+        message: 'Please select either standalone courses or a subscription plan',
+        type: 'error'
+      });
+      setIsSubmitting(false);
+      return;
+    }
 
     // Collect selected courses
     const selectedCourses: number[] = []
@@ -214,34 +287,46 @@ const page = () => {
     try {
       const res = await apiService.postWithToken('/enrollments/enroll', payload)
       console.log('Student created:', res)
-      alert('Student created successfully')
       
-      // Reset form
-      setStudent({
-        firstName: '',
-        secondName: '',
-        email: '',
-        phoneNumber: '',
-        nationality: '',
-        dateOfBirth: '',
-        idNumber: '',
-        gender: '',
-        password: '',
-        nokFirstName: '',
-        nokSecondName: '',
-        nokEmail: '',
-        nokPhone: '',
-        nokRelationship: '',
-        nokOccupation: '',
-        totalFees: '',
-      })
-      setStandaloneCourses({ computer: false, ai: false })
-      setSubscription('')
-      setSubscriptionCourses({ driving: false, computer: false, ai: false })
-      setSelectedInstructors({ drivingTheory: '', drivingPractical: '', computer: '', ai: '' })
+      setToast({
+        message: 'Student registered successfully!',
+        type: 'success'
+      });
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        router.push('/admin/students');
+      }, 2000);
     } catch (err: any) {
       console.error(err)
-      alert(err.message || 'Failed to create student')
+      
+      // Extract error message from API response
+      let errorMessage = 'Failed to register student';
+      
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (data.message) {
+          errorMessage = data.message;
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.errors) {
+          const errorValues = Object.values(data.errors);
+          if (errorValues.length > 0) {
+            errorMessage = Array.isArray(errorValues[0])
+              ? errorValues[0][0]
+              : String(errorValues[0]);
+          }
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setToast({
+        message: errorMessage,
+        type: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -258,6 +343,15 @@ const page = () => {
 
   return (
     <div className="ml-0 lg:ml-64">
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 lg:left-64 bg-white z-40 h-20 md:h-25 p-4 md:p-6 pl-16 lg:pl-6 border-b border-gray-200 shadow-sm">
         <h1 className="text-3xl font-bold text-gray-800">Add Student</h1>
@@ -686,9 +780,10 @@ const page = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+              disabled={isSubmitting}
+              className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Student
+              {isSubmitting ? 'Registering...' : 'Create Student'}
             </button>
           </div>
         </form>

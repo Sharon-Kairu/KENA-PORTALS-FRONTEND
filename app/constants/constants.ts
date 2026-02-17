@@ -71,18 +71,13 @@ export const adminPages=[
     icon: FiHome,
   },
   {
-    name: 'Add Student',
-    href: '/admin/addstudent',
-    icon: FaUserGraduate,
-  },
-  {
-    name: 'Add Instructor',
-    href: '/admin/addinstructor',
+    name: 'Instructors',
+    href: '/admin/instructors',
     icon: FaUserCheck,
   },
   {
-    name: 'All Students',
-    href: '/admin/allstudents',
+    name: 'Students',
+    href: '/admin/students',
     icon: FaUsers,
   },
   {
